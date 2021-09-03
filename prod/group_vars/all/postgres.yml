@@ -1,0 +1,6 @@
+psono_postgres_data_path: "/opt/docker/psono/postgres"
+psono_postgres_user: "psono"
+psono_postgres_password: "{{ vault_psono_postgres_password }}"
+psono_postgres_container_name: "psono-database" 
+psono_postgres_container_hostname: "psonodb" 
+psono_postgres_database_name: "psono"

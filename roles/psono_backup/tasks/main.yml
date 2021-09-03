@@ -1,0 +1,11 @@
+- name: Deploy FTP backup script
+  template:
+    src: "psono_ftp_backup.sh.j2"
+    dest: "{{ psono_ftp_backup_script_path }}"
+
+- name: create ftp backup cron entry
+  cron:
+    name: "psono ftp backup"
+    minute: "0"
+    hour: "1,13"
+    job: "PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\" /bin/bash {{ psono_ftp_backup_script_path }} >> /var/log/psono_backup.log"

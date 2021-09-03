@@ -1,0 +1,6 @@
+psono_ftp_backup_local_dir: "/var/archives/psono"
+psono_ftp_backup_script_path: "{{ psono_config_dir }}psono_ftp_backup.sh"
+
+psono_ftp_backup_host: ""
+psono_ftp_backup_password: "{{ vault_psono_ftp_backup_password }}"
+psono_ftp_backup_user: ""

@@ -1,0 +1,13 @@
+psono_fileserver_config_path: "{{ psono_config_dir }}fileserver.conf"
+
+psono_fileserver_uri: "/fileserver"
+psono_fileserver_url: "{{ psono_frontend_url }}{{ psono_fileserver_uri }}"
+
+psono_fileserver_cluster_name: ""
+psono_fileserver_shard_name: ""
+psono_fileserver_shard_desc: ""
+
+psono_fileserver_data_path: "/opt/docker/psono/fileserver"
+
+psono_fileserver_container_name: "psono_fileserver"
+

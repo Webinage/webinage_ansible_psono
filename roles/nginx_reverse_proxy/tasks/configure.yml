@@ -1,0 +1,50 @@
+- name: Ensure ACME webroot dir is present
+  file:
+    path: "/var/www/{{ psono_hostname }}"
+    state: "directory"
+
+- name: Deploy nginx reverse proxy config file
+  template:
+    src: "site.conf.j2"
+    dest: "/etc/nginx/sites-available/{{ psono_hostname }}.conf"
+  notify: restart nginx
+
+- name: Enable config
+  file:
+    src: "/etc/nginx/sites-available/{{ psono_hostname }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ psono_hostname }}.conf"
+    state: link
+  notify: restart nginx
+
+- name: Disable default config
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+  notify: restart nginx
+
+- name: Ensure certs dir is present
+  file:
+    path: /etc/letsencrypt/bootstrap/{{ psono_hostname }}
+    state: directory
+
+#With "creates" ensure symlink will not be modified if live cert is already present
+- name: ensure at least self signed certs are present for nginx conf to work
+  command: openssl req -newkey rsa:4096 -nodes -keyout /tmp/tmpprivkey.pem -x509 -days 365 -out /tmp/tmpfullchain.pem -new -subj "/CN={{ psono_hostname }}/" 
+  args: 
+    creates: /etc/letsencrypt/live/{{ psono_hostname }}/fullchain.pem
+  register: newcert
+
+- name: Ensure symlinks to self signed certs are set if none is present
+  file:
+    src: /tmp/tmp{{ item }}
+    dest: /etc/letsencrypt/bootstrap/{{ psono_hostname }}/{{ item }}
+    state: link
+  with_items:
+    - fullchain.pem
+    - privkey.pem
+  when: newcert.changed
+
+
+
+- name: start nginx
+  service: name=nginx state=started

@@ -1,0 +1,46 @@
+- name: wait for psono backend to become available
+  uri:
+    url: "http://127.0.0.1:{{ psono_backend_local_port }}/info/"
+    return_content: yes
+  register: result
+  until: "not result.failed and result.status == 200 and result.content.find('info') != -1"
+  retries: 200
+  delay: 5
+
+- name: Create main admin user
+  docker_container:
+    name: "psono_auth_bootstrapper"
+    state: started
+    image: "psono/psono-server:latest"
+    volumes:
+      - "{{ psono_config_path }}:/root/.psono_server/settings.yaml"
+    restart_policy: "no"
+    detach: no
+    interactive: yes
+    tty: yes
+    auto_remove: yes
+    network_mode: "{{ psono_docker_network_name }}"
+    networks:
+      - name: "{{ psono_docker_network_name }}"
+    container_default_behavior: compatibility
+    command: ["python3", "./psono/manage.py", "createuser", "{{ psono_admin_bootstrap_username }}", "{{ psono_admin_bootstrap_password }}", "{{ psono_admin_bootstrap_email }}"]
+  ignore_errors: yes
+
+- name: Promote main admin user
+  docker_container:
+    name: "psono_auth_bootstrapper"
+    state: started
+    image: "psono/psono-server:latest"
+    volumes:
+      - "{{ psono_config_path }}:/root/.psono_server/settings.yaml"
+    restart_policy: "no"
+    detach: no
+    interactive: yes
+    tty: yes
+    auto_remove: yes
+    network_mode: "{{ psono_docker_network_name }}"
+    networks:
+      - name: "{{ psono_docker_network_name }}"
+    container_default_behavior: compatibility
+    command: ["python3", "./psono/manage.py", "promoteuser", "{{ psono_admin_bootstrap_username }}", "superuser"]
+  ignore_errors: yes

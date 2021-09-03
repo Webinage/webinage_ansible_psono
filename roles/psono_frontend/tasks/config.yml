@@ -1,0 +1,9 @@
+- name: Ensure psono config dir is present
+  file:
+    path: "{{ psono_config_dir }}"
+    state: directory
+
+- name: Deploy Psono frontend config file
+  template:
+    src: "config.json.j2"
+    dest: "{{ psono_frontend_config_path }}"

@@ -1,0 +1,33 @@
+- name: Ensure docker is installed
+  package:
+    name: docker
+    state: present
+
+- name: Ensure Postgres data dir is present
+  file:
+    path: "{{ psono_postgres_data_path }}"
+    state: directory
+
+- name: Ensure Psono Docker network is present
+  docker_network:
+    name: "{{ psono_docker_network_name }}"
+
+- name: Ensure Postgres container for Psono is present and started
+  docker_container:
+    name: "{{ psono_postgres_container_name }}"
+    state: started
+    image: "postgres:13-alpine"
+    volumes:
+      - "{{ psono_postgres_data_path }}:/var/lib/postgresql/data"
+    restart_policy: "unless-stopped"
+    detach: yes
+    network_mode: "{{ psono_docker_network_name }}"
+    networks:
+      - name: "{{ psono_docker_network_name }}"
+        aliases:
+          - "{{ psono_postgres_container_hostname }}"
+    hostname: "{{ psono_postgres_container_hostname }}"
+    container_default_behavior: compatibility
+    env:
+      POSTGRES_USER: "{{ psono_postgres_user }}"
+      POSTGRES_PASSWORD: "{{ psono_postgres_password }}"

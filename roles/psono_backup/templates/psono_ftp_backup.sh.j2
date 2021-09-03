@@ -1,0 +1,31 @@
+#!/bin/bash
+
+UPLOAD_FTP_HOST="{{ psono_ftp_backup_host }}"
+UPLOAD_FTP_PASSWORD="{{ psono_ftp_backup_password }}"
+UPLOAD_FTP_USER="{{ psono_ftp_backup_user }}"
+UPLOAD_FTP_DESTINATION="${HOSTNAME}"
+UPLOAD_FTP_DBDUMP_DESTINATION="${UPLOAD_FTP_DESTINATION}/database"
+UPLOAD_FTP_FILES_DESTINATION="${UPLOAD_FTP_DESTINATION}/files"
+BACKUP_LOCAL_DIR="{{ psono_ftp_backup_local_dir }}"
+BACKUP_LOCAL_DIR_DB="${BACKUP_LOCAL_DIR}/database"
+BACKUP_LOCAL_DIR_FILES="${BACKUP_LOCAL_DIR}/files"
+BACKUP_DB_FILENAME="psono_dump_$(date '+%Y_%m_%d_%H_%M_%S').sql"
+BACKUP_FILES_FILENAME="psono_files_$(date '+%Y_%m_%d_%H_%M_%S').tar.gz"
+
+docker run -e "PGPASSWORD={{ psono_postgres_password }}" --network {{ psono_docker_network_name }} -it --rm --entrypoint pg_dump postgres -h {{ psono_postgres_container_hostname }} -U {{ psono_postgres_user }} -p 5432 {{ psono_postgres_database_name }} > "${BACKUP_LOCAL_DIR_DB}/${BACKUP_DB_FILENAME}"
+
+tar -zcf "${BACKUP_LOCAL_DIR_FILES}/${BACKUP_FILES_FILENAME}" {{ psono_fileserver_data_path }}
+
+ftp -dniv "${UPLOAD_FTP_HOST}" << EOF
+user  "${UPLOAD_FTP_USER}" "${UPLOAD_FTP_PASSWORD}"
+mkdir "${UPLOAD_FTP_DESTINATION}"
+mkdir "${UPLOAD_FTP_DBDUMP_DESTINATION}"
+mkdir "${UPLOAD_FTP_FILES_DESTINATION}"
+lcd "${BACKUP_LOCAL_DIR_DB}"
+cd "${UPLOAD_FTP_DBDUMP_DESTINATION}"
+put  "${BACKUP_DB_FILENAME}"
+cd ../..
+lcd "${BACKUP_LOCAL_DIR_FILES}"
+cd "${UPLOAD_FTP_FILES_DESTINATION}"
+put  "${BACKUP_FILES_FILENAME}"
+EOF

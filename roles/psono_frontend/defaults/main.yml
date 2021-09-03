@@ -1,0 +1,15 @@
+
+psono_config_dir: "/opt/docker/psono/"
+psono_frontend_config_path: "{{ psono_config_dir }}config.json"
+psono_frontend_container_name: "psono_frontend"
+
+psono_hostname: ""
+psono_frontend_url: "https://{{ psono_hostname }}"
+psono_backend_uri: "/server"
+psono_backend_url: "{{ psono_frontend_url }}{{ psono_backend_uri }}"
+psono_admin_uri: "/portal"
+psono_admin_url: "{{ psono_frontend_url }}{{ psono_admin_uri }}"
+
+psono_domain: ""
+
+psono_frontend_local_port: 10101

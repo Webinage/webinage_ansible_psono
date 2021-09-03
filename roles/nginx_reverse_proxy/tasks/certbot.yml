@@ -1,0 +1,55 @@
+- apt_repository:
+    repo: 'ppa:certbot/certbot'
+
+- name: apt-get update
+  apt:
+    update_cache: yes
+
+- name: Install certbot agent
+  apt: name={{item}} state=latest
+  with_items:
+    - certbot
+    - python3-certbot-nginx
+
+- name: ensure certbot app is present in ufw config
+  copy:
+    src: "certbot.ini"
+    dest: "/etc/ufw/applications.d/certbot.ini"
+    mode: 0644
+
+- name: ensure certbot hooks are present
+  copy:
+    src: "{{ item }}"
+    dest: "/root/{{ item }}"
+    mode: 0755
+  with_items:
+    - certbot_posthook.sh
+    - certbot_prehook.sh
+
+
+- name: Run certbot to get a cert
+  shell: "certbot certonly -n -m {{ certbot_mail }} --pre-hook /root/certbot_prehook.sh --post-hook /root/certbot_posthook.sh --agree-tos --webroot --webroot-path /var/www/{{ psono_hostname }}/ --domain {{ psono_hostname }} --cert-name {{ psono_hostname }}"
+
+- name: Enable certbot autorenew
+  cron:
+    name: "certbot renew {{ psono_hostname }}"
+    minute: 30
+    hour: 2
+    day: 10
+    user: "root"
+    job: "certbot renew >> /var/log/cron.log 2>&1"
+
+- name: Ensure symlinks to certs are set to live and not temp
+  file:
+    src: /etc/letsencrypt/live/{{ psono_hostname }}/{{ item }}
+    dest: /etc/letsencrypt/bootstrap/{{ psono_hostname }}/{{ item }}
+    state: link
+  with_items:
+    - fullchain.pem
+    - privkey.pem
+  notify: restart nginx
+
+#Create first cert if doesnt exist
+#Setup crontab for autorenew
+#Have pre post hooks to open fw on 80
+#Have a config for nginx 80 for /.well-known/acme-challenge/

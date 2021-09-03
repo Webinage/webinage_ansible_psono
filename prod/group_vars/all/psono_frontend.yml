@@ -1,0 +1,2 @@
+psono_frontend_config_path: "{{ psono_config_dir }}config.json"
+psono_frontend_container_name: "psono_frontend"

@@ -1,0 +1,170 @@
+##
+# You should look at the following URL's in order to grasp a solid understanding
+# of Nginx configuration files in order to fully unleash the power of Nginx.
+# http://wiki.nginx.org/Pitfalls
+# http://wiki.nginx.org/QuickStart
+# http://wiki.nginx.org/Configuration
+#
+# Generally, you will want to move this file somewhere, and start with a clean
+# file but keep this around for reference. Or just disable in sites-enabled.
+#
+# Please see /usr/share/doc/nginx-doc/examples/ for more detailed examples.
+##
+
+# Default server configuration
+#
+server {
+    ssl_protocols TLSv1.2;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_tickets off;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    ssl_session_timeout 1d;
+    resolver 8.8.8.8 8.8.4.4 valid=300s;
+    resolver_timeout 5s;
+    ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256';
+
+    add_header Referrer-Policy same-origin;
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+
+    add_header Content-Security-Policy "default-src 'none';  manifest-src 'self'; connect-src 'self' https://static.psono.com https://api.pwnedpasswords.com https://storage.googleapis.com https://*.digitaloceanspaces.com https://*.blob.core.windows.net https://*.s3.amazonaws.com; font-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'self'";
+    
+    client_max_body_size 256m;
+
+    gzip on;
+    gzip_disable "msie6";
+
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_buffers 16 8k;
+    gzip_http_version 1.1;
+    gzip_min_length 256;
+    gzip_types text/plain text/css application/json application/x-javascript application/javascript text/xml application/xml application/xml+rss text/javascript application/vnd.ms-fontobject application/x-font-ttf font/opentype image/svg+xml image/x-icon;
+
+    root /var/www/html;
+
+    index index.html index.htm index.nginx-debian.html;
+
+    server_name {{ psono_hostname }};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/{{ psono_hostname }};
+        try_files $uri $uri/ =404;
+    }
+
+    location {{ psono_backend_uri }} {
+        # First attempt to serve request as file, then
+        # as directory, then fall back to displaying a 404.
+        # try_files $uri $uri/ =404;
+
+        rewrite ^{{ psono_backend_uri }}/(.*) /$1 break;
+        proxy_set_header        Host $host;
+        proxy_set_header        X-Real-IP $remote_addr;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header        X-Forwarded-Proto $scheme;
+
+        add_header Last-Modified $date_gmt;
+        add_header Pragma "no-cache";
+        add_header Cache-Control "private, max-age=0, no-cache, no-store";
+        if_modified_since off;
+        expires off;
+        etag off;
+
+        proxy_pass http://127.0.0.1:{{ psono_backend_local_port }};
+    }
+
+
+    location ~* ^{{ psono_admin_uri }}.*\.(?:ico|css|js|gif|jpe?g|png|eot|woff|woff2|ttf|svg|otf)$ {
+        expires 30d;
+        add_header Pragma public;
+        add_header Cache-Control "public";
+
+        proxy_set_header        Host $host;
+        proxy_set_header        X-Real-IP $remote_addr;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header        X-Forwarded-Proto $scheme;
+        
+        proxy_pass          http://localhost:{{ psono_admin_local_port }};
+        proxy_redirect      http://localhost:{{ psono_admin_local_port }} https://{{ psono_hostname }};
+    }
+    
+    location {{ psono_admin_uri }} {
+        proxy_set_header        Host $host;
+        proxy_set_header        X-Real-IP $remote_addr;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header        X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout  90;
+        proxy_pass http://127.0.0.1:{{ psono_admin_local_port }};
+    }
+    
+    location {{ psono_fileserver_uri }} {
+		rewrite ^{{ psono_fileserver_uri }}/(.*) /$1 break;
+		proxy_set_header        Host $host;
+		proxy_set_header        X-Real-IP $remote_addr;
+		proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header        X-Forwarded-Proto $scheme;
+
+        add_header Last-Modified $date_gmt;
+        add_header Pragma "no-cache";
+        add_header Cache-Control "private, max-age=0, no-cache, no-store";
+        if_modified_since off;
+        expires off;
+        etag off;
+
+		proxy_pass          http://localhost:{{ psono_fileserver_local_port }};
+
+        # The big traffic will be encrypted chunks, so using gzip here causes only server load
+        gzip off;
+
+        # To allow the 128 MB chunks
+        client_max_body_size 256m;
+    }
+
+    location / {
+        proxy_set_header        Host $host;
+        proxy_set_header        X-Real-IP $remote_addr;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header        X-Forwarded-Proto $scheme;
+    
+        proxy_pass http://127.0.0.1:{{ psono_frontend_local_port }};
+        proxy_read_timeout  90;
+        proxy_redirect      http://localhost:{{ psono_frontend_local_port }} https://{{ psono_hostname }};
+    }
+
+    listen [::]:443 ssl ipv6only=on http2; 
+    listen 443 ssl http2; 
+    ssl_certificate /etc/letsencrypt/bootstrap/{{ psono_hostname }}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/bootstrap/{{ psono_hostname }}/privkey.pem; # managed by Certbot
+
+}
+
+server {
+
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/{{ psono_hostname }};
+        try_files $uri $uri/ =404;
+    }
+    
+    if ($host = {{ psono_hostname }}) {
+
+
+
+
+        return 301 https://$host$request_uri;
+    } 
+
+
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+        server_name {{ psono_hostname }};
+    return 404;
+
+
+}

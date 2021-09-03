@@ -1,0 +1,2 @@
+psono_admin_frontend_container_name: "psono_admin_frontend"
+psono_admin_frontend_config_path: "{{ psono_config_dir }}admin_config.json"

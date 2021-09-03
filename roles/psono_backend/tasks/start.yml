@@ -1,0 +1,21 @@
+
+- name: Ensure Psono backend container is present and started
+  docker_container:
+    name: "{{ psono_backend_container_name }}"
+    state: started
+    image: "psono/psono-server:latest"
+    volumes:
+      - "{{ psono_config_path }}:/root/.psono_server/settings.yaml"
+    restart_policy: "unless-stopped"
+    detach: yes
+    network_mode: "{{ psono_docker_network_name }}"
+    networks:
+      - name: "{{ psono_docker_network_name }}"
+        aliases:
+          - "{{ psono_backend_container_name }}"
+    hostname: "{{ psono_backend_container_name }}"
+    container_default_behavior: compatibility
+    ports:
+     - "127.0.0.1:{{ psono_backend_local_port }}:80"
+    sysctls:
+      net.core.somaxconn: 65535

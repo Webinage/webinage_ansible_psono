@@ -1,0 +1,2 @@
+- name: Install Postgres for Psono
+  include: install.yml

@@ -1,0 +1,3 @@
+psono_admin_bootstrap_password: "{{ vault_psono_admin_bootstrap_password }}"
+psono_admin_bootstrap_username: ""
+psono_admin_bootstrap_email: ""

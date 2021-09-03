@@ -1,0 +1,13 @@
+
+- name: Ensure Psono frontend container is present and started
+  docker_container:
+    name: "{{ psono_frontend_container_name }}"
+    state: started
+    image: "psono/psono-client:latest"
+    volumes:
+      - "{{ psono_frontend_config_path }}:/usr/share/nginx/html/config.json"
+    restart_policy: "unless-stopped"
+    detach: yes
+    container_default_behavior: compatibility
+    ports:
+     - "127.0.0.1:{{ psono_frontend_local_port }}:80"

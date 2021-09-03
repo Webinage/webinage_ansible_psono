@@ -1,0 +1,5 @@
+- name: Configure Psono Admin Frontend
+  include: config.yml
+
+- name: Start Psono Admin Frontend
+  include: start.yml

@@ -1,0 +1,31 @@
+psono_config_dir: "/opt/docker/psono/"
+psono_config_path: "{{ psono_config_dir }}settings.yaml"
+
+
+psono_secret_key: "{{ vault_psono_secret_key }}"
+psono_activation_link_secret: "{{ vault_psono_activation_link_secret }}"
+psono_db_secret: "{{ vault_psono_db_secret }}"
+psono_email_secret_salt: "{{ vault_psono_email_secret_salt }}"
+psono_private_key: "{{ vault_psono_private_key }}"
+psono_public_key: "{{ vault_psono_public_key }}"
+
+psono_hostname: ""
+psono_frontend_url: "https://{{ psono_hostname }}"
+psono_backend_uri: "/server"
+psono_backend_url: "{{ psono_frontend_url }}{{ psono_backend_uri }}"
+psono_admin_uri: "/portal"
+psono_admin_url: "{{ psono_frontend_url }}{{ psono_admin_uri }}"
+
+psono_enforce_domain: false
+psono_domain: " "
+
+psono_email_host: ""
+psono_email_host_user: ""
+psono_email_host_password : "{{ vault_psono_email_host_password }}"
+
+psono_backend_container_name: "psono_backend"
+
+psono_backend_local_port: 10100
+psono_frontend_local_port: 10101
+psono_admin_local_port: 10102
+psono_fileserver_local_port: 10200

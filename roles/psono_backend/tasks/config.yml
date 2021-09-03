@@ -1,0 +1,26 @@
+- name: Ensure psono config dir is present
+  file:
+    path: "{{ psono_config_dir }}"
+    state: directory
+
+- name: Deploy Psono config file
+  template:
+    src: "settings.yaml.j2"
+    dest: "{{ psono_config_path }}"
+
+- name: Setup or Migrate database
+  docker_container:
+    name: "Temp_Psono_DB_Migration"
+    state: started
+    image: "psono/psono-server:latest"
+    volumes:
+      - "{{ psono_config_path }}:/root/.psono_server/settings.yaml"
+    restart_policy: "no"
+    detach: no
+    cleanup: yes
+    tty: yes
+    network_mode: "{{ psono_docker_network_name }}"
+    networks:
+      - name: "{{ psono_docker_network_name }}"
+    container_default_behavior: compatibility
+    command: ["python3", "./psono/manage.py", "migrate"]
