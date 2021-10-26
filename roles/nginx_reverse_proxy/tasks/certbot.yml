@@ -49,7 +49,15 @@
     - privkey.pem
   notify: restart nginx
 
-#Create first cert if doesnt exist
-#Setup crontab for autorenew
-#Have pre post hooks to open fw on 80
-#Have a config for nginx 80 for /.well-known/acme-challenge/
+- name: Add auto nginx reload to certbot conf
+  lineinfile:
+    path: /etc/letsencrypt/cli.ini
+    regexp: '^deploy-hook ='
+    line: 'deploy-hook = systemctl reload nginx'
+
+- name: Adjust renew conf to workaround bug in certbot 0.31
+  lineinfile:
+    path: "/etc/letsencrypt/renewal/{{ psono_hostname }}.conf"
+    insertafter: "[[webroot_map]]"
+    regexp: "^{{ psono_hostname }} = /var/www/{{ psono_hostname }}"
+    line: "{{ psono_hostname }} = /var/www/{{ psono_hostname }}"
