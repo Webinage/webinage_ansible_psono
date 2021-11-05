@@ -1,3 +1,12 @@
+- name: apt-get update
+  apt:
+    update_cache: yes
+
+- name: Install snap agent
+  apt: 
+    name: "snapd"
+    state: "latest"
+
 - name: Ensure snap core is prensent
   community.general.snap:
     name: core
