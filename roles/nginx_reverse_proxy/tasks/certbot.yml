@@ -1,15 +1,17 @@
-- apt_repository:
-    repo: 'ppa:certbot/certbot'
+- name: Ensure snap core is prensent
+  community.general.snap:
+    name: core
 
-- name: apt-get update
-  apt:
-    update_cache: yes
+- name: Install certbot
+  community.general.snap:
+    name: certbot
+    classic: yes
 
-- name: Install certbot agent
-  apt: name={{item}} state=latest
-  with_items:
-    - certbot
-    - python3-certbot-nginx
+- name: Symlink certbot snap to certbot path
+  file:
+    src: /snap/bin/certbot
+    dest: /usr/bin/certbot
+    state: link
 
 - name: ensure certbot app is present in ufw config
   copy:
