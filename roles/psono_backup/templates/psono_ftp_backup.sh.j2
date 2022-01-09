@@ -12,6 +12,9 @@ BACKUP_LOCAL_DIR_FILES="${BACKUP_LOCAL_DIR}/files"
 BACKUP_DB_FILENAME="psono_dump_$(date '+%Y_%m_%d_%H_%M_%S').sql"
 BACKUP_FILES_FILENAME="psono_files_$(date '+%Y_%m_%d_%H_%M_%S').tar.gz"
 
+mkdir -p "${BACKUP_LOCAL_DIR_DB}"
+mkdir -p "${BACKUP_LOCAL_DIR_FILES}"
+
 docker run -e "PGPASSWORD={{ psono_postgres_password }}" --network {{ psono_docker_network_name }} --rm --entrypoint pg_dump postgres -h {{ psono_postgres_container_hostname }} -U {{ psono_postgres_user }} -p 5432 {{ psono_postgres_database_name }} > "${BACKUP_LOCAL_DIR_DB}/${BACKUP_DB_FILENAME}"
 
 tar -zcf "${BACKUP_LOCAL_DIR_FILES}/${BACKUP_FILES_FILENAME}" {{ psono_fileserver_data_path }}
