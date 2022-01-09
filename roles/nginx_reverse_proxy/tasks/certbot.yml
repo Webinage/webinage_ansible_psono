@@ -36,12 +36,13 @@
   with_items:
     - certbot_posthook.sh
     - certbot_prehook.sh
+    - certbot_deployhook.sh
 
 - name: reload nginx before certbot is triggered
   service: name=nginx state=reloaded
 
 - name: Run certbot to get a cert
-  shell: "certbot certonly -n -m {{ certbot_mail }} --pre-hook /root/certbot_prehook.sh --post-hook /root/certbot_posthook.sh --agree-tos --webroot --webroot-path /var/www/{{ psono_hostname }}/ --domain {{ psono_hostname }} --cert-name {{ psono_hostname }}"
+  shell: "certbot certonly -n -m {{ certbot_mail }} --pre-hook /root/certbot_prehook.sh --post-hook /root/certbot_posthook.sh --deploy-hook /root/certbot_deployhook.sh --agree-tos --webroot --webroot-path /var/www/{{ psono_hostname }}/ --domain {{ psono_hostname }} --cert-name {{ psono_hostname }}"
 
 - name: Enable certbot autorenew
   cron:
@@ -61,16 +62,3 @@
     - fullchain.pem
     - privkey.pem
   notify: restart nginx
-
-- name: Add auto nginx reload to certbot conf
-  lineinfile:
-    path: /etc/letsencrypt/cli.ini
-    regexp: '^deploy-hook ='
-    line: 'deploy-hook = systemctl reload nginx'
-
-- name: Adjust renew conf to workaround bug in certbot 0.31
-  lineinfile:
-    path: "/etc/letsencrypt/renewal/{{ psono_hostname }}.conf"
-    insertafter: "[[webroot_map]]"
-    regexp: "^{{ psono_hostname }} = /var/www/{{ psono_hostname }}"
-    line: "{{ psono_hostname }} = /var/www/{{ psono_hostname }}"
