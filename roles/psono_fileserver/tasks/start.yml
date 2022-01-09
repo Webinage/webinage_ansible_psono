@@ -1,9 +1,3 @@
-- name: Set server dns to localhost ip 
-  set_fact:
-    custom_fileserver_hosts_file:
-      - key: "{{ psono_hostname }}"
-        value: 127.0.0.1
-
 - name: Ensure Psono fileserver container is present and started
   docker_container:
     name: "{{ psono_fileserver_container_name }}"
@@ -20,7 +14,6 @@
         aliases:
           - "{{ psono_fileserver_container_name }}"
     hostname: "{{ psono_fileserver_container_name }}"
-    etc_hosts: "{{ custom_fileserver_hosts_file | items2dict }}"
     container_default_behavior: compatibility
     ports:
      - "127.0.0.1:{{ psono_fileserver_local_port }}:80"
