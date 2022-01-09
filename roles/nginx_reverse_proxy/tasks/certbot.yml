@@ -37,6 +37,8 @@
     - certbot_posthook.sh
     - certbot_prehook.sh
 
+- name: reload nginx before certbot is triggered
+  service: name=nginx state=reloaded
 
 - name: Run certbot to get a cert
   shell: "certbot certonly -n -m {{ certbot_mail }} --pre-hook /root/certbot_prehook.sh --post-hook /root/certbot_posthook.sh --agree-tos --webroot --webroot-path /var/www/{{ psono_hostname }}/ --domain {{ psono_hostname }} --cert-name {{ psono_hostname }}"
