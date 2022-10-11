@@ -8,6 +8,6 @@
   - psono_backend
   - psono_frontend
   - psono_admin_frontend
+  - nginx_reverse_proxy
   - psono_fileserver
   - psono_backup
-  - nginx_reverse_proxy
