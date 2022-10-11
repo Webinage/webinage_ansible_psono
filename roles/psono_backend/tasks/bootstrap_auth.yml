@@ -7,6 +7,12 @@
   retries: 200
   delay: 5
 
+- name: pull latest Psono Server image for update
+  docker_image:
+    source: pull
+    name: "psono/psono-server:latest"
+  tags: [never, update]
+
 - name: Create main admin user
   docker_container:
     name: "psono_auth_bootstrapper"

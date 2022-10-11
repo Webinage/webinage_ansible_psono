@@ -1,3 +1,33 @@
+- name: pull latest Psono Fileserver image for update
+  docker_image:
+    source: pull
+    name: "psono/psono-fileserver:latest"
+  tags: [never, update]
+
+- name: Recreate Psono fileserver container
+  docker_container:
+    recreate: yes
+    name: "{{ psono_fileserver_container_name }}"
+    state: started
+    image: "psono/psono-fileserver:latest"
+    volumes:
+      - "{{ psono_fileserver_config_path }}:/root/.psono_fileserver/settings.yaml"
+      - "{{ psono_fileserver_data_path }}:/opt/psono-shard"
+    restart_policy: "unless-stopped"
+    detach: yes
+    network_mode: "{{ psono_docker_network_name }}"
+    networks:
+      - name: "{{ psono_docker_network_name }}"
+        aliases:
+          - "{{ psono_fileserver_container_name }}"
+    hostname: "{{ psono_fileserver_container_name }}"
+    container_default_behavior: compatibility
+    ports:
+     - "127.0.0.1:{{ psono_fileserver_local_port }}:80"
+    sysctls:
+      net.core.somaxconn: 65535
+  tags: [never, update]
+
 - name: Ensure Psono fileserver container is present and started
   docker_container:
     name: "{{ psono_fileserver_container_name }}"

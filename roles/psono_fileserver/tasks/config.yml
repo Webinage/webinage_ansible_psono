@@ -3,6 +3,11 @@
     path: "{{ psono_fileserver_data_path }}"
     state: directory
 
+- name: pull latest Psono Fileserver image for update
+  docker_image:
+    source: pull
+    name: "psono/psono-fileserver:latest"
+  tags: [never, update]
 
 - name: Generate fileserver conf script
   template:

@@ -8,6 +8,12 @@
     src: "settings.yaml.j2"
     dest: "{{ psono_config_path }}"
 
+- name: pull latest Psono Server image for update
+  docker_image:
+    source: pull
+    name: "psono/psono-server:latest"
+  tags: [never, update]
+
 - name: Setup or Migrate database
   docker_container:
     name: "Temp_Psono_DB_Migration"
@@ -17,7 +23,7 @@
       - "{{ psono_config_path }}:/root/.psono_server/settings.yaml"
     restart_policy: "no"
     detach: no
-    cleanup: yes
+    auto_remove: yes
     tty: yes
     network_mode: "{{ psono_docker_network_name }}"
     networks:
