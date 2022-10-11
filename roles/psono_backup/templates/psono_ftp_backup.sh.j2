@@ -32,3 +32,9 @@ lcd "${BACKUP_LOCAL_DIR_FILES}"
 cd "${UPLOAD_FTP_FILES_DESTINATION}"
 put  "${BACKUP_FILES_FILENAME}"
 EOF
+
+# Cleanup DB backups older than 3 month except on the 1st of every month
+find "${BACKUP_LOCAL_DIR_DB}" -type f -mtime +90 ! -name 'psono_dump_20??_??_01*' -name 'psono_dump_*.sql' -exec rm {} \;
+
+# Cleanup file backups older than 15 days except on the 1st of every month
+find "${BACKUP_LOCAL_DIR_FILES}" -type f -mtime +15 ! -name 'psono_files_20??_??_01*' -name 'psono_files_*.tar.gz' -exec rm {} \;
