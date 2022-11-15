@@ -11,6 +11,7 @@
 - name: pull latest Psono Server image for update
   docker_image:
     source: pull
+    force_source: yes
     name: "psono/psono-server:latest"
   tags: [never, update]
 

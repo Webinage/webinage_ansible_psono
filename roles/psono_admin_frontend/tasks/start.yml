@@ -1,6 +1,7 @@
 - name: pull latest Psono Admin Client image for update
   docker_image:
     source: pull
+    force_source: yes
     name: "psono/psono-admin-client:latest"
   tags: [never, update]
 
