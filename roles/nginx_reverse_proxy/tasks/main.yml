@@ -6,3 +6,4 @@
 
 - name: Configure certbot certificate and renewal
   include: certbot.yml
+  when: not psono_external_reverse_proxy

@@ -2,12 +2,21 @@
   file:
     path: "/var/www/{{ psono_hostname }}"
     state: "directory"
+  when: not psono_external_reverse_proxy
 
 - name: Deploy nginx reverse proxy config file
   template:
     src: "site.conf.j2"
     dest: "/etc/nginx/sites-available/{{ psono_hostname }}.conf"
   notify: restart nginx
+  when: not psono_external_reverse_proxy
+
+- name: Deploy nginx reverse proxy config file
+  template:
+    src: "site_external_proxy.conf.j2"
+    dest: "/etc/nginx/sites-available/{{ psono_hostname }}.conf"
+  notify: restart nginx
+  when: psono_external_reverse_proxy
 
 - name: Enable config
   file:
@@ -26,6 +35,7 @@
   file:
     path: /etc/letsencrypt/bootstrap/{{ psono_hostname }}
     state: directory
+  when: not psono_external_reverse_proxy
 
 #With "creates" ensure symlink will not be modified if live cert is already present
 - name: ensure at least self signed certs are present for nginx conf to work
@@ -33,6 +43,7 @@
   args: 
     creates: /etc/letsencrypt/live/{{ psono_hostname }}/fullchain.pem
   register: newcert
+  when: not psono_external_reverse_proxy
 
 - name: Ensure symlinks to self signed certs are set if none is present
   file:
@@ -42,9 +53,7 @@
   with_items:
     - fullchain.pem
     - privkey.pem
-  when: newcert.changed
-
-
+  when: newcert.changed and not psono_external_reverse_proxy
 
 - name: start nginx
   service: name=nginx state=started
