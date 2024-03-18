@@ -1,5 +1,5 @@
 # generate the following six parameters with the following command
-# docker run --rm -ti psono/psono-server:latest python3 ./psono/manage.py generateserverkeys
+# docker run --rm -ti psono/psono-server:{{ psono_backend_version_tag }} python3 ./psono/manage.py generateserverkeys
 SECRET_KEY: '{{ psono_secret_key}}'
 ACTIVATION_LINK_SECRET: '{{ psono_activation_link_secret}}'
 DB_SECRET: {{ psono_db_secret}}

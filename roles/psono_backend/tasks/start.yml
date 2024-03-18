@@ -2,7 +2,7 @@
   docker_image:
     source: pull
     force_source: yes
-    name: "psono/psono-server:latest"
+    name: "psono/psono-server:{{ psono_backend_version_tag }}"
   tags: [never, update]
   
 - name: Recreate Psono backend container
@@ -10,7 +10,7 @@
     recreate: yes
     name: "{{ psono_backend_container_name }}"
     state: started
-    image: "psono/psono-server:latest"
+    image: "psono/psono-server:{{ psono_backend_version_tag }}"
     volumes:
       - "{{ psono_config_path }}:/root/.psono_server/settings.yaml"
     restart_policy: "unless-stopped"
@@ -32,7 +32,7 @@
   docker_container:
     name: "{{ psono_backend_container_name }}"
     state: started
-    image: "psono/psono-server:latest"
+    image: "psono/psono-server:{{ psono_backend_version_tag }}"
     volumes:
       - "{{ psono_config_path }}:/root/.psono_server/settings.yaml"
     restart_policy: "unless-stopped"

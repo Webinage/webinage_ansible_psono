@@ -2,7 +2,7 @@
   docker_image:
     source: pull
     force_source: yes
-    name: "psono/psono-fileserver:latest"
+    name: "psono/psono-fileserver:{{ psono_fileserver_version_tag }}"
   tags: [never, update]
 
 - name: Recreate Psono fileserver container
@@ -10,7 +10,7 @@
     recreate: yes
     name: "{{ psono_fileserver_container_name }}"
     state: started
-    image: "psono/psono-fileserver:latest"
+    image: "psono/psono-fileserver:{{ psono_fileserver_version_tag }}"
     volumes:
       - "{{ psono_fileserver_config_path }}:/root/.psono_fileserver/settings.yaml"
       - "{{ psono_fileserver_data_path }}:/opt/psono-shard"
@@ -33,7 +33,7 @@
   docker_container:
     name: "{{ psono_fileserver_container_name }}"
     state: started
-    image: "psono/psono-fileserver:latest"
+    image: "psono/psono-fileserver:{{ psono_fileserver_version_tag }}"
     volumes:
       - "{{ psono_fileserver_config_path }}:/root/.psono_fileserver/settings.yaml"
       - "{{ psono_fileserver_data_path }}:/opt/psono-shard"

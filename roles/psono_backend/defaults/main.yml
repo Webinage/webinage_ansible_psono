@@ -1,5 +1,6 @@
 psono_config_dir: "/opt/docker/psono/"
 psono_config_path: "{{ psono_config_dir }}settings.yaml"
+psono_backend_version_tag: "3.5.3"
 
 psono_secret_key: ""
 psono_activation_link_secret: ""

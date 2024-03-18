@@ -11,14 +11,14 @@
   docker_image:
     source: pull
     force_source: yes
-    name: "psono/psono-server:latest"
+    name: "psono/psono-server:{{ psono_backend_version_tag }}"
   tags: [never, update]
 
 - name: Create main admin user
   docker_container:
     name: "psono_auth_bootstrapper"
     state: started
-    image: "psono/psono-server:latest"
+    image: "psono/psono-server:{{ psono_backend_version_tag }}"
     volumes:
       - "{{ psono_config_path }}:/root/.psono_server/settings.yaml"
     restart_policy: "no"
@@ -37,7 +37,7 @@
   docker_container:
     name: "psono_auth_bootstrapper"
     state: started
-    image: "psono/psono-server:latest"
+    image: "psono/psono-server:{{ psono_backend_version_tag }}"
     volumes:
       - "{{ psono_config_path }}:/root/.psono_server/settings.yaml"
     restart_policy: "no"

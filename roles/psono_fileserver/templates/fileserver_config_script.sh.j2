@@ -1,8 +1,8 @@
 #!/bin/bash
-CLUSTERID=$(docker run --rm --network {{ psono_docker_network_name }} -v {{ psono_config_path }}:/root/.psono_server/settings.yaml -ti psono/psono-server:latest python3 ./psono/manage.py fsclustercreate "{{ psono_fileserver_cluster_name }}" |  grep -oP '(?<=Created. Cluster ID: )[0-9a-z\-]*')
-SHARDID=$(docker run --rm --network {{ psono_docker_network_name }} -v {{ psono_config_path }}:/root/.psono_server/settings.yaml -ti psono/psono-server:latest python3 ./psono/manage.py fsshardcreate "{{ psono_fileserver_shard_name }}" "{{ psono_fileserver_shard_desc }}" |  grep -oP '(?<=Created. Shard ID: )[0-9a-z\-]*')
-docker run --rm --network {{ psono_docker_network_name }} -v {{ psono_config_path }}:/root/.psono_server/settings.yaml -ti psono/psono-server:latest python3 ./psono/manage.py fsshardlink "${CLUSTERID}" "${SHARDID}}" rw
-docker run --rm --network {{ psono_docker_network_name }} -v {{ psono_config_path }}:/root/.psono_server/settings.yaml -ti psono/psono-server:latest python3 ./psono/manage.py fsclustershowconfig "${CLUSTERID}" > {{ psono_fileserver_config_path }}
+CLUSTERID=$(docker run --rm --network {{ psono_docker_network_name }} -v {{ psono_config_path }}:/root/.psono_server/settings.yaml -ti psono/psono-server:{{ psono_backend_version_tag }} python3 ./psono/manage.py fsclustercreate "{{ psono_fileserver_cluster_name }}" |  grep -oP '(?<=Created. Cluster ID: )[0-9a-z\-]*')
+SHARDID=$(docker run --rm --network {{ psono_docker_network_name }} -v {{ psono_config_path }}:/root/.psono_server/settings.yaml -ti psono/psono-server:{{ psono_backend_version_tag }} python3 ./psono/manage.py fsshardcreate "{{ psono_fileserver_shard_name }}" "{{ psono_fileserver_shard_desc }}" |  grep -oP '(?<=Created. Shard ID: )[0-9a-z\-]*')
+docker run --rm --network {{ psono_docker_network_name }} -v {{ psono_config_path }}:/root/.psono_server/settings.yaml -ti psono/psono-server:{{ psono_backend_version_tag }} python3 ./psono/manage.py fsshardlink "${CLUSTERID}" "${SHARDID}}" rw
+docker run --rm --network {{ psono_docker_network_name }} -v {{ psono_config_path }}:/root/.psono_server/settings.yaml -ti psono/psono-server:{{ psono_backend_version_tag }} python3 ./psono/manage.py fsclustershowconfig "${CLUSTERID}" > {{ psono_fileserver_config_path }}
 echo 'DEBUG: False' >> {{ psono_fileserver_config_path }}
 echo "ALLOWED_HOSTS: ['"'*'"']" >> {{ psono_fileserver_config_path }}
 echo "HOST_URL: '{{ psono_fileserver_url }}'" >> {{ psono_fileserver_config_path }}

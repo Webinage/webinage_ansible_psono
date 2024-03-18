@@ -1,0 +1,5 @@
+postgres_version_tag: "16.2-alpine"
+psono_backend_version_tag: "3.5.3"
+psono_frontend_version_tag: "2.4.9"
+psono_admin_frontend_version_tag: "1.6.11"
+psono_fileserver_version_tag: "1.2.3"

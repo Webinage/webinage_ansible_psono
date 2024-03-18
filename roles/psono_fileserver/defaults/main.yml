@@ -1,4 +1,5 @@
 psono_fileserver_config_path: "{{ psono_config_dir }}fileserver.conf"
+psono_fileserver_version_tag: "1.2.3"
 
 psono_fileserver_uri: "/fileserver"
 psono_fileserver_url: "{{ psono_frontend_url }}{{ psono_fileserver_uri }}"

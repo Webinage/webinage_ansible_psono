@@ -7,7 +7,7 @@
   docker_image:
     source: pull
     force_source: yes
-    name: "psono/psono-fileserver:latest"
+    name: "psono/psono-fileserver:{{ psono_fileserver_version_tag }}"
   tags: [never, update]
 
 - name: Generate fileserver conf script

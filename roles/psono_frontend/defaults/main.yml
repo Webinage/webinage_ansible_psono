@@ -2,6 +2,7 @@
 psono_config_dir: "/opt/docker/psono/"
 psono_frontend_config_path: "{{ psono_config_dir }}config.json"
 psono_frontend_container_name: "psono_frontend"
+psono_frontend_version_tag: "2.4.9"
 
 psono_hostname: ""
 psono_frontend_url: "https://{{ psono_hostname }}"

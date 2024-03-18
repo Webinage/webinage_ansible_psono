@@ -4,4 +4,4 @@
     minute: 30
     hour: 2
     user: "root"
-    job: "docker run --rm --network {{ psono_docker_network_name }} -v {{ psono_config_path }}:/root/.psono_server/settings.yaml -ti psono/psono-server:latest python3 ./psono/manage.py cleartoken >> /var/log/cron.log 2>&1"
+    job: "docker run --rm --network {{ psono_docker_network_name }} -v {{ psono_config_path }}:/root/.psono_server/settings.yaml -ti psono/psono-server:{{ psono_backend_version_tag }} python3 ./psono/manage.py cleartoken >> /var/log/cron.log 2>&1"

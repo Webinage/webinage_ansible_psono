@@ -16,7 +16,7 @@
   docker_container:
     name: "{{ psono_postgres_container_name }}"
     state: started
-    image: "postgres:13-alpine"
+    image: "postgres:{{ postgres_version_tag }}"
     volumes:
       - "{{ psono_postgres_data_path }}:/var/lib/postgresql/data"
     restart_policy: "unless-stopped"
