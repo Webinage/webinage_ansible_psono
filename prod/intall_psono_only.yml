@@ -1,0 +1,12 @@
+- name: Create Postgres for Psono
+  become: yes
+  hosts: psono_host
+  vars_files:
+    - secrets.yml
+  roles:
+  - postgres
+  - psono_backend
+  - psono_frontend
+  - psono_admin_frontend
+  - psono_fileserver
+  - psono_backup
