@@ -125,7 +125,7 @@ server {
         proxy_redirect      http://localhost:{{ psono_frontend_local_port }} https://{{ psono_hostname }};
     }
 
-    listen [::]:8080 ipv6only=on http2 default_server; 
-    listen 8080 http2 default_server; 
+    listen [::]:8080 ipv6only=on default_server; 
+    listen 8080 default_server; 
 
 }
