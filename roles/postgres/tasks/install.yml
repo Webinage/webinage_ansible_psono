@@ -1,7 +1,3 @@
-- name: Ensure docker is installed
-  package:
-    name: docker
-    state: present
 
 - name: Ensure Postgres data dir is present
   file:
