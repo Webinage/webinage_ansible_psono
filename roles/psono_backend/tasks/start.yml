@@ -23,7 +23,7 @@
     hostname: "{{ psono_backend_container_name }}"
     container_default_behavior: compatibility
     ports:
-     - "127.0.0.1:{{ psono_backend_local_port }}:80"
+     - "{{ psono_external_reverse_proxy | ternary('0.0.0.0','127.0.0.1') }}:{{ psono_backend_local_port }}:80"
     sysctls:
       net.core.somaxconn: 65535
   tags: [never, update]
@@ -45,6 +45,6 @@
     hostname: "{{ psono_backend_container_name }}"
     container_default_behavior: compatibility
     ports:
-     - "127.0.0.1:{{ psono_backend_local_port }}:80"
+     - "{{ psono_external_reverse_proxy | ternary('0.0.0.0','127.0.0.1') }}:{{ psono_backend_local_port }}:80"
     sysctls:
       net.core.somaxconn: 65535

@@ -17,7 +17,7 @@
     detach: yes
     container_default_behavior: compatibility
     ports:
-     - "127.0.0.1:{{ psono_admin_local_port }}:80"
+     - "{{ psono_external_reverse_proxy | ternary('0.0.0.0','127.0.0.1') }}:{{ psono_admin_local_port }}:80"
   tags: [never, update]
 
 - name: Ensure Psono admin frontend container is present and started
@@ -31,4 +31,4 @@
     detach: yes
     container_default_behavior: compatibility
     ports:
-     - "127.0.0.1:{{ psono_admin_local_port }}:80"
+     - "{{ psono_external_reverse_proxy | ternary('0.0.0.0','127.0.0.1') }}:{{ psono_admin_local_port }}:80"
