@@ -1,3 +1,8 @@
+- name: install curlftpfs for ftp backups management
+  apt: 
+    name: curlftpfs
+    state: latest
+
 - name: Deploy FTP backup script
   template:
     src: "psono_ftp_backup.sh.j2"

@@ -1,16 +1,14 @@
 #!/bin/bash
 
-UPLOAD_FTP_HOST="{{ psono_ftp_backup_host }}"
-UPLOAD_FTP_PASSWORD="{{ psono_ftp_backup_password }}"
-UPLOAD_FTP_USER="{{ psono_ftp_backup_user }}"
-UPLOAD_FTP_DESTINATION="${HOSTNAME}"
-UPLOAD_FTP_DBDUMP_DESTINATION="${UPLOAD_FTP_DESTINATION}/database"
-UPLOAD_FTP_FILES_DESTINATION="${UPLOAD_FTP_DESTINATION}/files"
 BACKUP_LOCAL_DIR="{{ psono_ftp_backup_local_dir }}"
 BACKUP_LOCAL_DIR_DB="${BACKUP_LOCAL_DIR}/database"
 BACKUP_LOCAL_DIR_FILES="${BACKUP_LOCAL_DIR}/files"
 BACKUP_DB_FILENAME="psono_dump_$(date '+%Y_%m_%d_%H_%M_%S').sql"
 BACKUP_FILES_FILENAME="psono_files_$(date '+%Y_%m_%d_%H_%M_%S').tar.gz"
+UPLOAD_FTP_DESTINATION="${HOSTNAME}"
+UPLOAD_FTP_DBDUMP_DESTINATION="${UPLOAD_FTP_DESTINATION}/database"
+UPLOAD_FTP_FILES_DESTINATION="${UPLOAD_FTP_DESTINATION}/files"
+UPLOAD_FTP_MOUNT_DIR="${BACKUP_LOCAL_DIR}/ftp_mounts"
 
 mkdir -p "${BACKUP_LOCAL_DIR_DB}"
 mkdir -p "${BACKUP_LOCAL_DIR_FILES}"
@@ -19,22 +17,31 @@ docker run -e "PGPASSWORD={{ psono_postgres_password }}" --network {{ psono_dock
 
 tar -zcf "${BACKUP_LOCAL_DIR_FILES}/${BACKUP_FILES_FILENAME}" {{ psono_fileserver_data_path }}
 
-ftp -dniv "${UPLOAD_FTP_HOST}" << EOF
-user  "${UPLOAD_FTP_USER}" "${UPLOAD_FTP_PASSWORD}"
-mkdir "${UPLOAD_FTP_DESTINATION}"
-mkdir "${UPLOAD_FTP_DBDUMP_DESTINATION}"
-mkdir "${UPLOAD_FTP_FILES_DESTINATION}"
-lcd "${BACKUP_LOCAL_DIR_DB}"
-cd "${UPLOAD_FTP_DBDUMP_DESTINATION}"
-put  "${BACKUP_DB_FILENAME}"
-cd ../..
-lcd "${BACKUP_LOCAL_DIR_FILES}"
-cd "${UPLOAD_FTP_FILES_DESTINATION}"
-put  "${BACKUP_FILES_FILENAME}"
-EOF
+mkdir -p "${UPLOAD_FTP_MOUNT_DIR}"
+mkdir -p "${UPLOAD_FTP_MOUNT_DIR}/ftp1"
+
+curlftpfs -o 'user={{ psono_ftp_backup_user }}:{{ psono_ftp_backup_password }}' '{{ psono_ftp_backup_host }}' "${UPLOAD_FTP_MOUNT_DIR}/ftp1"
+if [ $? -eq 0 ]
+then echo ftp1 mounted
+    mkdir -p "${UPLOAD_FTP_MOUNT_DIR}/ftp1/${UPLOAD_FTP_DBDUMP_DESTINATION}"
+    mkdir -p "${UPLOAD_FTP_MOUNT_DIR}/ftp1/${UPLOAD_FTP_FILES_DESTINATION}"
+    cp "${BACKUP_LOCAL_DIR_DB}/${BACKUP_DB_FILENAME}" "${UPLOAD_FTP_MOUNT_DIR}/ftp1/${UPLOAD_FTP_DBDUMP_DESTINATION}/"
+    cp "${BACKUP_LOCAL_DIR_FILES}/${BACKUP_FILES_FILENAME}" "${UPLOAD_FTP_MOUNT_DIR}/ftp1/${UPLOAD_FTP_FILES_DESTINATION}/"
+
+    # Cleanup remote DB backups older than 3 month except on the 1st of every month
+    find "${UPLOAD_FTP_MOUNT_DIR}/ftp1/${UPLOAD_FTP_DBDUMP_DESTINATION}/" -type f -mtime +90 ! -name 'psono_dump_20??_??_01_01**' -name 'psono_dump_*.sql' -exec rm {} \;
+
+    # Cleanup remote file backups older than 15 days except on the 1st of every month
+    find "${UPLOAD_FTP_MOUNT_DIR}/ftp1/${UPLOAD_FTP_FILES_DESTINATION}/" -type f -mtime +15 ! -name 'psono_files_20??_??_01_01*' -name 'psono_files_*.tar.gz' -exec rm {} \;
+
+    fusermount -u "${UPLOAD_FTP_MOUNT_DIR}/ftp1"
+fi
+
+rmdir "${UPLOAD_FTP_MOUNT_DIR}/ftp1"
+
 
 # Cleanup DB backups older than 3 month except on the 1st of every month
-find "${BACKUP_LOCAL_DIR_DB}" -type f -mtime +90 ! -name 'psono_dump_20??_??_01*' -name 'psono_dump_*.sql' -exec rm {} \;
+find "${BACKUP_LOCAL_DIR_DB}" -type f -mtime +90 ! -name 'psono_dump_20??_??_01_01**' -name 'psono_dump_*.sql' -exec rm {} \;
 
 # Cleanup file backups older than 15 days except on the 1st of every month
-find "${BACKUP_LOCAL_DIR_FILES}" -type f -mtime +15 ! -name 'psono_files_20??_??_01*' -name 'psono_files_*.tar.gz' -exec rm {} \;
+find "${BACKUP_LOCAL_DIR_FILES}" -type f -mtime +15 ! -name 'psono_files_20??_??_01_01*' -name 'psono_files_*.tar.gz' -exec rm {} \;
