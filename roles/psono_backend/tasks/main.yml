@@ -1,11 +1,11 @@
 - name: Configure Psono
-  include: config.yml
+  include_tasks: config.yml
 
 - name: Start Psono
-  include: start.yml
+  include_tasks: start.yml
 
 - name: Enable auto Psono cleanup
-  include: schedule_cleanup.yml
+  include_tasks: schedule_cleanup.yml
 
 - name: Bootstrap Psono authentication
-  include: bootstrap_auth.yml
+  include_tasks: bootstrap_auth.yml

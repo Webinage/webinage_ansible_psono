@@ -1,5 +1,5 @@
 - name: Deploy and generate config
-  include: config.yml
+  include_tasks: config.yml
 
 - name: Start fileserver container
-  include: start.yml
+  include_tasks: start.yml

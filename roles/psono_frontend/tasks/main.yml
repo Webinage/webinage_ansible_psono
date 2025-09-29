@@ -1,5 +1,5 @@
 - name: Configure Psono Frontend
-  include: config.yml
+  include_tasks: config.yml
 
 - name: Start Psono Frontend
-  include: start.yml
+  include_tasks: start.yml

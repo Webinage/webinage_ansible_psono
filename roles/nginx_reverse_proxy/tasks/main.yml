@@ -1,9 +1,9 @@
 - name: Install Nginx
-  include: install.yml
+  include_tasks: install.yml
   
 - name: Configure and start nginx
-  include: configure.yml
+  include_tasks: configure.yml
 
 - name: Configure certbot certificate and renewal
-  include: certbot.yml
+  include_tasks: certbot.yml
   when: not psono_external_reverse_proxy
